@@ -51,22 +51,20 @@ class TwentyFortyEight:
     """
     Class to run the game logic.
     """
-    GAME_GRID = {
-        'height': 0,
-        'width': 0,
-        'zone': [[]],
-        'indices': {
-            UP: [],
-            DOWN: [],
-            LEFT: [],
-            RIGHT: []
-        }
-    }
 
     def __init__(self, grid_height, grid_width):
         # replace with your code
-        self.GAME_GRID['height'] = grid_height
-        self.GAME_GRID['width'] = grid_width
+        self._game_kernel = {
+            'height':  grid_height,
+            'width': grid_width,
+            'zone': [[]],
+            'indices': {
+                UP: [],
+                DOWN: [],
+                LEFT: [],
+                RIGHT: []
+            }
+        }
         self.computing_indices()
         self.reset()
 
@@ -76,11 +74,11 @@ class TwentyFortyEight:
         tiles in all directions.
         """
         for col in range(self.get_grid_width()):
-            self.GAME_GRID['indices'][UP].append((0, col))
-            self.GAME_GRID['indices'][DOWN].append(((self.get_grid_height() - 1), col))
+            self._game_kernel['indices'][UP].append((0, col))
+            self._game_kernel['indices'][DOWN].append(((self.get_grid_height() - 1), col))
         for row in range(self.get_grid_height()):
-            self.GAME_GRID['indices'][LEFT].append((row, 0))
-            self.GAME_GRID['indices'][RIGHT].append((row, self.get_grid_width() - 1))
+            self._game_kernel['indices'][LEFT].append((row, 0))
+            self._game_kernel['indices'][RIGHT].append((row, self.get_grid_width() - 1))
 
     def reset(self):
         """
@@ -88,7 +86,7 @@ class TwentyFortyEight:
         initial tiles.
         """
         # replace with your code
-        self.GAME_GRID['zone'] = [[
+        self._game_kernel['zone'] = [[
             0
             for _ in range(self.get_grid_width())]
             for _ in range(self.get_grid_height())
@@ -101,11 +99,11 @@ class TwentyFortyEight:
         Return a string representation of the grid for debugging.
         """
         # replace with your code
-        grid = ''
+        grid = ""
         for row in range(self.get_grid_height()):
             for col in range(self.get_grid_width()):
-                grid = grid + str(self.GAME_GRID['zone'][row][col]) + ' '
-            grid = grid + '\n'
+                grid = grid + str(self.get_tile(row, col)) + " "
+            grid = grid + "\n"
         return grid
 
     def get_grid_height(self):
@@ -113,14 +111,14 @@ class TwentyFortyEight:
         Get the height of the board.
         """
         # replace with your code
-        return self.GAME_GRID['height']
+        return self._game_kernel['height']
 
     def get_grid_width(self):
         """
         Get the width of the board.
         """
         # replace with your code
-        return self.GAME_GRID['width']
+        return self._game_kernel['width']
 
     def move(self, direction):
         """
@@ -130,35 +128,28 @@ class TwentyFortyEight:
         # replace with your code
         changed = False
         index = 0
-        for grid in self.GAME_GRID['indices'][direction]:
+        for grid in self._game_kernel['indices'][direction]:
             tile_values = []
             position = []
             if direction == UP or direction == DOWN:
                 for pos in range(self.get_grid_height()):
                     position.append((grid[0] + pos * OFFSETS[direction][0], grid[1]))
-                    tile_values.append(self.GAME_GRID['zone'][position[pos][0]][position[pos][1]])
+                    # tile_values.append(self._game_kernel['zone'][position[pos][0]][position[pos][1]])
+                    tile_values.append(self.get_tile(position[pos][0], position[pos][1]))
                 # print position
                 # print tile_values
                 merged_values = merge(tile_values)
                 # print merged_values
                 for pos, row in zip(position, range(self.get_grid_height())):
                     # print self.get_tile(pos[0], pos[1])
-                    # print self.get_tile(row, index)
                     if merged_values[pos[0]] != self.get_tile(row, index):
                         self.set_tile(row, index, merged_values[pos[0]])
                         changed = True
-            # else:
-            #     for pos in range(self.GAME_GRID['width']):
-            #         position = ((grid[0], grid[1] + pos * OFFSETS[direction][1]))
-            #         tile_values.append(self.GAME_GRID['zone'][position[0]][position[1]])
-            #     merged_values = merge(tile_values)
-            #     for col in range(self.GAME_GRID['width']):
-            #         self.set_tile(index, col, merged_values[col])
-            #         # print (index, col)
             else:
-                for pos in range(self.get_grid_height()):
+                for pos in range(self.get_grid_width()):
                     position.append((grid[0], grid[1] + pos * OFFSETS[direction][1]))
-                    tile_values.append(self.GAME_GRID['zone'][position[pos][0]][position[pos][1]])
+                    # tile_values.append(self._game_kernel['zone'][position[pos][0]][position[pos][1]])
+                    tile_values.append(self.get_tile(position[pos][0], position[pos][1]))
                 # print tile_values
                 # print position
                 merged_values = merge(tile_values)
@@ -184,12 +175,12 @@ class TwentyFortyEight:
         while True:
             rand_row = random.randint(0, self.get_grid_height() - 1)
             rand_col = random.randint(0, self.get_grid_width() - 1)
-            if self.GAME_GRID['zone'][rand_row][rand_col] == 0:
+            if self._game_kernel['zone'][rand_row][rand_col] == 0:
                 rand_pre_value = random.random()
                 rand_value = 2
                 if rand_pre_value > 0.9:
                     rand_value = 4
-                self.GAME_GRID['zone'][rand_row][rand_col] = rand_value
+                self._game_kernel['zone'][rand_row][rand_col] = rand_value
                 break
 
     def set_tile(self, row, col, value):
@@ -198,7 +189,7 @@ class TwentyFortyEight:
         """
         # replace with your code
         try:
-            self.GAME_GRID['zone'][row][col] = value
+            self._game_kernel['zone'][row][col] = value
         except IndexError:
             print 'index of the grid(row or col) is out of range'
 
@@ -208,35 +199,39 @@ class TwentyFortyEight:
         """
         # replace with your code
         try:
-            return self.GAME_GRID['zone'][row][col]
+            return self._game_kernel['zone'][row][col]
         except IndexError:
             print 'index of the grid(row or col) is out of range'
 
-
-obj = TwentyFortyEight(4, 4)
-obj.reset()
-# t.set_tile(1, 1, 2)
-# t.set_tile(3, 1, 2)
-# print t
-# # print t.GAME_GRID['indices']
-# t.move(RIGHT)
-# print t
-obj.set_tile(0, 0, 2)
-obj.set_tile(0, 1, 0)
-obj.set_tile(0, 2, 0)
-obj.set_tile(0, 3, 0)
-obj.set_tile(1, 0, 0)
-obj.set_tile(1, 1, 2)
-obj.set_tile(1, 2, 0)
-obj.set_tile(1, 3, 0)
-obj.set_tile(2, 0, 0)
-obj.set_tile(2, 1, 0)
-obj.set_tile(2, 2, 2)
-obj.set_tile(2, 3, 0)
-obj.set_tile(3, 0, 0)
-obj.set_tile(3, 1, 0)
-obj.set_tile(3, 2, 0)
-obj.set_tile(3, 3, 2)
-obj.move(DOWN)
+obj = TwentyFortyEight(4, 5)
+obj.set_tile(0, 0, 8)
+obj.set_tile(0, 1, 16)
+obj.set_tile(0, 2, 8)
+obj.set_tile(0, 3, 16)
+obj.set_tile(0, 4, 8)
+obj.set_tile(1, 0, 16)
+obj.set_tile(1, 1, 8)
+obj.set_tile(1, 2, 16)
+obj.set_tile(1, 3, 8)
+obj.set_tile(1, 4, 16)
+obj.set_tile(2, 0, 8)
+obj.set_tile(2, 1, 16)
+obj.set_tile(2, 2, 8)
+obj.set_tile(2, 3, 16)
+obj.set_tile(2, 4, 8)
+obj.set_tile(3, 0, 16)
+obj.set_tile(3, 1, 8)
+obj.set_tile(3, 2, 16)
+obj.set_tile(3, 3, 8)
+obj.set_tile(3, 4, 16)
 print obj
-# poc_2048_gui.run_gui(TwentyFortyEight(4, 4))
+obj.move(RIGHT)
+# print "obj1 before\n", obj
+
+# obj2 = TwentyFortyEight(4, 4) # this should be OK!
+#
+# obj.move(DOWN)
+# print "obj1 after\n", obj
+#
+# print "obj2\n", obj2
+# # # poc_2048_gui.run_gui(TwentyFortyEight(4, 4))
